@@ -1,1 +1,3 @@
-# pyspark_fackts
+### pyspark_fackts
+## run
+python3 dimstunt_facts.py
