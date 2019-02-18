@@ -5,7 +5,6 @@ import re
 import string
 import pyspark
 from pprint import pprint
-from collections import Counter
 import numpy as np
 
 SEP = '"========================================================================'
@@ -19,19 +18,11 @@ def load_documents():
     return documents
 
 
-def run_spark_5(sc, docs_rdd, extractor):
-    result = docs_rdd.flatMap(extractor)
-    pprint(result.collect())
 
 
-def run_spark_2(sc, docs_rdd, extractor):
-    result = docs_rdd.flatMap(extractor)
-    pprint(result.reduceByKey(lambda a, b: a + b).collect())
-
-
-COUNTRY_RE = re.compile('(?P<name>[A-Z][a-z]{1,} ?[A-Z]*[a-z]*)\n\nIntroduction')
+COUNTRY_RE = re.compile('(?P<name>[A-Za-z ]+)\n\nIntroduction')
 RAIL_RE = re.compile('Railways:[ ]+total:[ ]+(?P<len>[0-9\.\,]+)?([ ]+km[ ]+)?(([a-zA-Z]+ )*)?(?P<type>[a-zA-Z]+)[ ]+gauge')
-SEARCH_IM_RE = re.compile('Imports - commodities:(.*?)\n\n', re.S)
+SEARCH_IM_RE = re.compile('Imports - commodities:  (.*?)\n\n', re.S)
 SPLIT_RE = re.compile('(?:and|,|;|\n)')
 
 def extract_railways(document):
@@ -63,6 +54,16 @@ def extract_imports(document):
         country.group('name').lower(),
         len(split) if split is not None else 0
     )]
+
+
+def run_spark_2(sc, docs_rdd, extractor):
+    result = docs_rdd.flatMap(extractor)
+    pprint(result.reduceByKey(lambda a, b: a + b).collect())
+
+
+def run_spark_5(sc, docs_rdd, extractor):
+    result = docs_rdd.flatMap(extractor)
+    pprint(result.collect())
 
 
 if __name__ == '__main__':
